@@ -10,20 +10,20 @@ const getAuthHeaders = () => {
 
 export const api = {
   // Auth
-  login: async (email: string, password: string, role: 'student' | 'instructor') => {
+  login: async (username: string, password: string, role: 'student' | 'instructor') => {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ username, password, role }),
     });
     return response.json();
   },
 
-  register: async (email: string, password: string, name: string) => {
+  register: async (username: string, password: string, name: string) => {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ username, password, name }),
     });
     return response.json();
   },
@@ -103,11 +103,11 @@ export const api = {
   },
 
   // Instructor - Create instructor account
-  createInstructor: async (email: string, password: string, name: string) => {
+  createInstructor: async (username: string, password: string, name: string) => {
     const response = await fetch(`${API_URL}/instructors`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ username, password, name }),
     });
     return response.json();
   },

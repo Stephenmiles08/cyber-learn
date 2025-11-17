@@ -24,7 +24,18 @@ const Leaderboard = () => {
   const fetchLeaderboard = async () => {
     try {
       const data = await api.getLeaderboard();
-      setEntries(data.leaderboard || []);
+  
+      // Backend returns: [{ username, total_score, labs_completed }]
+      // Frontend UI expects: { rank, name, score, labsCompleted }
+  
+      const formatted = data.map((entry: any, index: number) => ({
+        rank: index + 1,
+        name: entry.username,
+        score: entry.total_score,
+        labsCompleted: entry.labs_completed
+      }));
+  
+      setEntries(formatted);
     } catch (error) {
       toast({
         title: "Error",
@@ -35,6 +46,7 @@ const Leaderboard = () => {
       setIsLoading(false);
     }
   };
+  
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="h-5 w-5 text-yellow-500" />;

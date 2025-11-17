@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<'student' | 'instructor'>('student');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.login(email, password, role);
+      const response = await api.login(username, password, role);
       
       if (response.token) {
         localStorage.setItem('token', response.token);
@@ -63,7 +63,7 @@ const Login = () => {
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Welcome to CyberLab</CardTitle>
+          <CardTitle className="text-2xl">Welcome to SQI Cyber BootCamp Lab</CardTitle>
           <CardDescription>Sign in to continue your training</CardDescription>
         </CardHeader>
         <CardContent>
@@ -76,13 +76,13 @@ const Login = () => {
             <TabsContent value="student">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="Username">Username</Label>
                   <Input
                     id="email"
-                    type="email"
-                    placeholder="student@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Type..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>
@@ -111,13 +111,13 @@ const Login = () => {
             <TabsContent value="instructor">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="instructor-email">Email</Label>
+                  <Label htmlFor="instructor-username">Username</Label>
                   <Input
                     id="instructor-email"
-                    type="email"
-                    placeholder="instructor@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Type..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>

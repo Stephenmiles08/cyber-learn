@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
   name: string;
-  email: string;
+  username: string;
   totalScore: number;
   labsCompleted: number;
   rank: number;
@@ -25,8 +25,24 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const data = await api.getProfile();
-      setProfile(data);
+      const data = await api.getProfile(); // data = { username, labs }
+  
+      // Compute profile values for your UI
+      const totalScore = data.labs.reduce((sum: number, lab: any) => sum + lab.score_awarded, 0);
+      const labsCompleted = data.labs.filter((lab: any) => lab.score_awarded > 0).length;
+  
+      // For rank, you could call /leaderboard endpoint or leave 0 for now
+      // Example: call api.getLeaderboard() and find student's rank
+      const leaderboard = await api.getLeaderboard();
+      const rank = leaderboard.findIndex((s: any) => s.username === data.username) + 1;
+  
+      setProfile({
+        name: data.username, // If you have a real name field, replace here
+        username: data.username,
+        totalScore,
+        labsCompleted,
+        rank
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -80,7 +96,7 @@ const Profile = () => {
               </Avatar>
               <div>
                 <CardTitle className="text-2xl mb-1">{profile.name}</CardTitle>
-                <p className="text-muted-foreground">{profile.email}</p>
+                <p className="text-muted-foreground">{profile.username}</p>
               </div>
             </div>
           </CardHeader>

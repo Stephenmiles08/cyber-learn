@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Register = () => {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,20 +19,18 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
-      const response = await api.register(email, password, name);
-      
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('role', 'student');
-        
+      const response = await api.register(username, password, name);
+  
+      // Match backend
+      if (response.success) {
         toast({
           title: "Registration successful",
-          description: "Welcome to CyberLab!",
+          description: "Welcome to SQI Cyber BootCamp!",
         });
-
-        navigate('/student/dashboard');
+  
+        navigate('/login'); 
       } else {
         toast({
           title: "Registration failed",
@@ -59,7 +57,7 @@ const Register = () => {
             <Shield className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl">Create Student Account</CardTitle>
-          <CardDescription>Join CyberLab and start your training</CardDescription>
+          <CardDescription>Join SQI Cyber BootCamp and start your training</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
@@ -75,13 +73,13 @@ const Register = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="email"
-                type="email"
+                type="text"
                 placeholder="student@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
