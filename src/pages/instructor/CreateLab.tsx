@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,6 +15,7 @@ const CreateLab = () => {
   const [description, setDescription] = useState("");
   const [flag, setFlag] = useState("");
   const [score, setScore] = useState("");
+  const [difficulty, setDifficulty] = useState("Medium");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -28,7 +30,8 @@ const CreateLab = () => {
         description,
         flag,
         score: parseInt(score),
-      });
+        difficulty,
+      } as any);
 
       toast({
         title: "Lab created successfully",
@@ -53,6 +56,9 @@ const CreateLab = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Create New Lab</CardTitle>
+            <CardDescription>
+              Create a new cybersecurity challenge for students
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -68,15 +74,32 @@ const CreateLab = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Description (Markdown supported)</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the lab challenge..."
+                  placeholder="Describe the lab challenge... (You can use Markdown formatting)"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={6}
                   required
                 />
+                <p className="text-sm text-muted-foreground">
+                  Supports Markdown formatting including code blocks, links, and lists
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="difficulty">Difficulty</Label>
+                <Select value={difficulty} onValueChange={setDifficulty}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Easy">Easy</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

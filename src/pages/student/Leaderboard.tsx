@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trophy, Medal } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -14,16 +15,21 @@ interface LeaderboardEntry {
 
 const Leaderboard = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [period, setPeriod] = useState("all");
+  const [metric, setMetric] = useState("score");
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, [period, metric]);
 
   const fetchLeaderboard = async () => {
+    setIsLoading(true);
     try {
-      const data = await api.getLeaderboard();
+      const periodParam = period !== "all" ? period : undefined;
+      const metricParam = metric !== "score" ? metric : undefined;
+      const data = await api.getLeaderboardFiltered(periodParam, metricParam);
   
       // Backend returns: [{ username, total_score, labs_completed }]
       // Frontend UI expects: { rank, name, score, labsCompleted }
@@ -64,6 +70,39 @@ const Leaderboard = () => {
           <h1 className="text-3xl font-bold mb-2">Leaderboard</h1>
           <p className="text-muted-foreground">Top performers in cybersecurity training</p>
         </div>
+
+        {/* Filters */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Time Period</label>
+                <Select value={period} onValueChange={setPeriod}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Ranking By</label>
+                <Select value={metric} onValueChange={setMetric}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="score">Top Scorers</SelectItem>
+                    <SelectItem value="labs">Most Labs Solved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {isLoading ? (
           <div className="text-center py-12">
