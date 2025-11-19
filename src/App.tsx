@@ -17,6 +17,7 @@ import StudentDashboard from "./pages/student/StudentDashboard";
 import LabDetail from "./pages/student/LabDetail";
 import Leaderboard from "./pages/student/Leaderboard";
 import Profile from "./pages/student/Profile";
+import ChangePassword from "./pages/ChangePassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,16 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
+          {/* Change Password - Accessible to both roles */}
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute requiredRole={null}>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
           
           {/* Instructor Routes */}
           <Route

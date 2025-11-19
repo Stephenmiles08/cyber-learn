@@ -214,4 +214,22 @@ export const api = {
     });
     return response.json();
   },
+
+  // Get all instructors
+  getInstructors: async () => {
+    const response = await fetch(`${API_URL}/instructors`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Change password
+  changePassword: async (oldPassword: string, newPassword: string) => {
+    const response = await fetch(`${API_URL}/change-password`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ oldPassword, newPassword }),
+    });
+    return response.json();
+  },
 };

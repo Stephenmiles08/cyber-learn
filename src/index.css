@@ -43,42 +43,14 @@ All colors MUST be HSL.
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+
+    --gradient-dark-purple: 263 70% 15%;
+    --gradient-dark-blue: 233 50% 20%;
   }
 
   .dark {
-    --background: 220 13% 13%;
-    --foreground: 0 0% 98%;
-
-    --card: 220 13% 16%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 220 13% 16%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 189 94% 43%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 13% 20%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 220 13% 20%;
-    --muted-foreground: 220 9% 65%;
-
-    --accent: 142 76% 36%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 220 13% 20%;
-    --input: 220 13% 20%;
-    --ring: 189 94% 43%;
-
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --gradient-dark-purple: 263 70% 20%;
+    --gradient-dark-blue: 233 50% 25%;
   }
 }
 
@@ -89,6 +61,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Dark gradient utilities */
+  .bg-gradient-dark {
+    background: linear-gradient(135deg, hsl(var(--gradient-dark-purple)), hsl(var(--gradient-dark-blue)));
   }
 
   /* Markdown Styles */
