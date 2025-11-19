@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Edit, Trash2, Users, UserPlus, RotateCcw, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -24,9 +25,15 @@ interface Student {
   labs_solved: number;
 }
 
+interface Instructor {
+  id: string;
+  username: string;
+}
+
 const InstructorDashboard = () => {
   const [labs, setLabs] = useState<Lab[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -36,12 +43,18 @@ const InstructorDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [labsData, studentsData] = await Promise.all([
+      const [labsData, studentsData, instructorsData] = await Promise.all([
         api.getLabs(),
         api.getStudents(),
+        api.getInstructors(),
       ]);
       setLabs(labsData.labs || []);
+<<<<<<< HEAD
       setStudents(studentsData.students || []);
+=======
+      setStudents(studentsData || []);
+      setInstructors(instructorsData || []);
+>>>>>>> refs/remotes/origin/main
     } catch (error) {
       toast({
         title: "Error",
@@ -165,6 +178,34 @@ const InstructorDashboard = () => {
           </Card>
         ) : (
           <>
+            {/* Instructors Section */}
+            <Card className="mb-6 bg-gradient-dark border-border/50 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-foreground">All Instructors</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  List of all instructor accounts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {instructors.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No instructors found</p>
+                ) : (
+                  <ScrollArea className="h-[300px] pr-4">
+                    <div className="space-y-3">
+                      {instructors.map((instructor) => (
+                        <div
+                          key={instructor.id}
+                          className="p-4 rounded-lg bg-card/50 hover:bg-card/70 transition-all duration-300 shadow-md hover:shadow-lg border border-border/30"
+                        >
+                          <p className="font-bold text-lg text-foreground">{instructor.username}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Student List Section */}
             <Card className="mb-6">
               <CardHeader>

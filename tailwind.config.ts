@@ -55,6 +55,8 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        "gradient-dark-purple": "hsl(var(--gradient-dark-purple))",
+        "gradient-dark-blue": "hsl(var(--gradient-dark-blue))",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, LogOut } from "lucide-react";
+import { Shield, LogOut, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface NavbarProps {
@@ -55,9 +55,16 @@ export const Navbar = ({ role }: NavbarProps) => {
           )}
 
           {role && (
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <>
+              <Link to="/change-password">
+                <Button variant="ghost" size="icon">
+                  <KeyRound className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </>
           )}
         </div>
       </div>
