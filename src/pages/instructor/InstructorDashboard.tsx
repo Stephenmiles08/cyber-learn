@@ -49,12 +49,8 @@ const InstructorDashboard = () => {
         api.getInstructors(),
       ]);
       setLabs(labsData.labs || []);
-<<<<<<< HEAD
       setStudents(studentsData.students || []);
-=======
-      setStudents(studentsData || []);
-      setInstructors(instructorsData || []);
->>>>>>> refs/remotes/origin/main
+      setInstructors(instructorsData.instructors || []);
     } catch (error) {
       toast({
         title: "Error",

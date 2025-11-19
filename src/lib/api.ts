@@ -115,7 +115,7 @@ export const api = {
   registerInstructor: async (username: string, password: string) => {
     const response = await fetch(`${API_URL}/register-instructor`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ username, password }),
     });
     return response.json();
@@ -217,7 +217,7 @@ export const api = {
 
   // Get all instructors
   getInstructors: async () => {
-    const response = await fetch(`${API_URL}/instructors`, {
+    const response = await fetch(`${API_URL}/instructor`, {
       headers: getAuthHeaders(),
     });
     return response.json();
