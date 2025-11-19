@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'student' | 'instructor';
+  requiredRole?: 'student' | 'instructor' | null;
 }
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
