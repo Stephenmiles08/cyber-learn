@@ -8,9 +8,11 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
+import CreateInstructor from "./pages/instructor/CreateInstructor";
 import CreateLab from "./pages/instructor/CreateLab";
 import EditLab from "./pages/instructor/EditLab";
 import LabSubmissions from "./pages/instructor/LabSubmissions";
+import StudentProfile from "./pages/instructor/StudentProfile";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import LabDetail from "./pages/student/LabDetail";
 import Leaderboard from "./pages/student/Leaderboard";
@@ -36,6 +38,22 @@ const App = () => (
             element={
               <ProtectedRoute requiredRole="instructor">
                 <InstructorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/instructor/create"
+            element={
+              <ProtectedRoute requiredRole="instructor">
+                <CreateInstructor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/instructor/student/:id"
+            element={
+              <ProtectedRoute requiredRole="instructor">
+                <StudentProfile />
               </ProtectedRoute>
             }
           />

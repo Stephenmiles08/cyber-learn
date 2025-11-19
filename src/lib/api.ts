@@ -111,4 +111,107 @@ export const api = {
     });
     return response.json();
   },
+
+  registerInstructor: async (username: string, password: string) => {
+    const response = await fetch(`${API_URL}/register-instructor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    return response.json();
+  },
+
+  // Instructor - Get all students
+  getStudents: async () => {
+    const response = await fetch(`${API_URL}/instructor/students`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Leaderboard with filters
+  getLeaderboardFiltered: async (period?: string, metric?: string) => {
+    const params = new URLSearchParams();
+    if (period) params.append('period', period);
+    if (metric) params.append('metric', metric);
+    const query = params.toString();
+    const response = await fetch(`${API_URL}/leaderboard${query ? `?${query}` : ''}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Student details
+  getStudent: async (id: string) => {
+    const response = await fetch(`${API_URL}/students/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getStudentSolved: async (id: string) => {
+    const response = await fetch(`${API_URL}/students/${id}/solved`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getStudentAttempts: async (id: string) => {
+    const response = await fetch(`${API_URL}/students/${id}/attempts`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Lab hints
+  getLabHint: async (labId: string) => {
+    const response = await fetch(`${API_URL}/labs/${labId}/hint`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Lab status
+  getLabStatus: async (labId: string) => {
+    const response = await fetch(`${API_URL}/labs/${labId}/status`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Lab attempts
+  getLabAttempts: async (labId: string, studentId?: string) => {
+    const params = new URLSearchParams();
+    if (studentId) params.append('studentId', studentId);
+    const query = params.toString();
+    const response = await fetch(`${API_URL}/labs/${labId}/attempts${query ? `?${query}` : ''}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // Admin reset functions
+  resetDatabase: async () => {
+    const response = await fetch(`${API_URL}/admin/reset-db`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  resetScores: async () => {
+    const response = await fetch(`${API_URL}/admin/reset-scores`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  resetLabs: async () => {
+    const response = await fetch(`${API_URL}/admin/reset-labs`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
 };
