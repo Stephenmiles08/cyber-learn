@@ -41,7 +41,7 @@ const InstructorDashboard = () => {
         api.getStudents(),
       ]);
       setLabs(labsData.labs || []);
-      setStudents(studentsData || []);
+      setStudents(studentsData.students || []);
     } catch (error) {
       toast({
         title: "Error",

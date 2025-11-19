@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -143,21 +143,21 @@ export const api = {
 
   // Student details
   getStudent: async (id: string) => {
-    const response = await fetch(`${API_URL}/students/${id}`, {
+    const response = await fetch(`${API_URL}/instructor/students/${id}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
   getStudentSolved: async (id: string) => {
-    const response = await fetch(`${API_URL}/students/${id}/solved`, {
+    const response = await fetch(`${API_URL}/submissions/solved/${id}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
   getStudentAttempts: async (id: string) => {
-    const response = await fetch(`${API_URL}/students/${id}/attempts`, {
+    const response = await fetch(`${API_URL}/labs/${id}/attempts`, {
       headers: getAuthHeaders(),
     });
     return response.json();

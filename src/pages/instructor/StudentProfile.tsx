@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Student {
   username: string;
-  total_score: number;
+  max_score: number;
 }
 
 interface SolvedLab {
@@ -46,8 +46,8 @@ const StudentProfile = () => {
         api.getStudentAttempts(id!),
       ]);
       setStudent(studentData);
-      setSolvedLabs(solvedData);
-      setAttempts(attemptsData);
+      setSolvedLabs(solvedData.solved || []);
+      setAttempts(attemptsData.attempts || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -96,7 +96,7 @@ const StudentProfile = () => {
               <div className="text-right">
                 <div className="flex items-center gap-2 mb-1">
                   <Trophy className="h-5 w-5 text-primary" />
-                  <span className="text-2xl font-bold">{student.total_score}</span>
+                  <span className="text-2xl font-bold">{student.max_score}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Total Points</p>
               </div>
