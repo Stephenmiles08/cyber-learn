@@ -62,7 +62,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="student" />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8 text-center">

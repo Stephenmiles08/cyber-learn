@@ -46,6 +46,9 @@ All colors MUST be HSL.
 
     --gradient-dark-purple: 263 70% 15%;
     --gradient-dark-blue: 233 50% 20%;
+    
+    --glow-primary: 189 94% 43%;
+    --glow-accent: 142 76% 36%;
   }
 
   .dark {
@@ -66,6 +69,11 @@ All colors MUST be HSL.
   /* Dark gradient utilities */
   .bg-gradient-dark {
     background: linear-gradient(135deg, hsl(var(--gradient-dark-purple)), hsl(var(--gradient-dark-blue)));
+  }
+  
+  /* Glow text effect */
+  .glow-text {
+    text-shadow: 0 0 10px hsl(var(--glow-primary) / 0.5);
   }
 
   /* Markdown Styles */

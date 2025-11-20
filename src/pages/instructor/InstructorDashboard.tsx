@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2, Users, UserPlus, RotateCcw, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -34,11 +36,13 @@ const InstructorDashboard = () => {
   const [labs, setLabs] = useState<Lab[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [dashboardMode, setDashboardMode] = useState<'exercise' | 'competition'>('exercise');
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchData();
+    fetchDashboardMode();
   }, []);
 
   const fetchData = async () => {
@@ -59,6 +63,33 @@ const InstructorDashboard = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchDashboardMode = async () => {
+    try {
+      const data = await api.getDashboardMode();
+      setDashboardMode(data.mode || 'exercise');
+    } catch (error) {
+      console.error('Failed to fetch dashboard mode:', error);
+    }
+  };
+
+  const handleModeToggle = async (checked: boolean) => {
+    const newMode = checked ? 'competition' : 'exercise';
+    try {
+      await api.setDashboardMode(newMode);
+      setDashboardMode(newMode);
+      toast({
+        title: "Mode Changed",
+        description: `Students will now see ${newMode} labs`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to change mode",
+        variant: "destructive",
+      });
     }
   };
 
@@ -132,7 +163,7 @@ const InstructorDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="instructor" />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -174,6 +205,36 @@ const InstructorDashboard = () => {
           </Card>
         ) : (
           <>
+            {/* Dashboard Mode Toggle */}
+            <Card className="mb-6 bg-gradient-dark border-border/50 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-foreground">Dashboard Mode</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Control which lab type students can see
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 bg-card/30 rounded-lg border border-border/30">
+                  <div className="space-y-1">
+                    <Label htmlFor="mode-toggle" className="text-lg font-semibold text-foreground">
+                      {dashboardMode === 'exercise' ? '📚 Exercise Mode' : '🏆 Competition Mode'}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {dashboardMode === 'exercise' 
+                        ? 'Students see training exercises' 
+                        : 'Students see competition challenges'}
+                    </p>
+                  </div>
+                  <Switch
+                    id="mode-toggle"
+                    checked={dashboardMode === 'competition'}
+                    onCheckedChange={handleModeToggle}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Instructors Section */}
             <Card className="mb-6 bg-gradient-dark border-border/50 shadow-xl">
               <CardHeader>

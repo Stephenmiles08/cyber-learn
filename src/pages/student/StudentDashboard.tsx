@@ -40,7 +40,7 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="student" />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -60,28 +60,28 @@ const StudentDashboard = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {labs.map((lab) => (
               <Link key={lab.id} to={`/student/labs/${lab.id}`}>
-                <Card className="hover:shadow-lg transition-shadow h-full">
+                <Card className="hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 h-full bg-card/50 backdrop-blur-sm border-border/30 hover:border-primary/50 hover:scale-[1.02] rounded-2xl">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg">{lab.title}</CardTitle>
+                      <CardTitle className="text-lg text-foreground">{lab.title}</CardTitle>
                       {lab.completed && (
-                        <Badge className="bg-success">
+                        <Badge className="bg-success shadow-lg shadow-success/50">
                           <Award className="h-3 w-3 mr-1" />
                           Solved
                         </Badge>
                       )}
                     </div>
-                    <CardDescription className="line-clamp-3">{lab.description}</CardDescription>
+                    <CardDescription className="line-clamp-3 text-muted-foreground">{lab.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-primary">
+                      <span className="text-sm font-bold text-primary glow-text">
                         {lab.score} points
                       </span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Click to start →
                       </span>
                     </div>

@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://147.93.72.212:4000/';
+const API_URL = import.meta.env.VITE_API_URL || 'http://147.93.72.212:4000';
+
+// Dashboard mode type
+export type DashboardMode = 'exercise' | 'competition';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -229,6 +232,23 @@ export const api = {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ oldPassword, newPassword }),
+    });
+    return response.json();
+  },
+
+  // Dashboard mode
+  getDashboardMode: async () => {
+    const response = await fetch(`${API_URL}/dashboard-mode`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  setDashboardMode: async (mode: DashboardMode) => {
+    const response = await fetch(`${API_URL}/dashboard-mode`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ mode }),
     });
     return response.json();
   },
