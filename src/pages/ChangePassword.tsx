@@ -69,7 +69,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-dark">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role={role} />
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto">

@@ -102,7 +102,7 @@ const LabDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
         <Navbar role="student" />
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground">Loading lab...</p>
@@ -113,7 +113,7 @@ const LabDetail = () => {
 
   if (!lab) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
         <Navbar role="student" />
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground">Lab not found</p>
@@ -136,10 +136,10 @@ const LabDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="student" />
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <Card>
+        <Card className="backdrop-blur-sm bg-card/80 border-border/30 shadow-2xl rounded-2xl">
           <CardHeader>
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
@@ -156,12 +156,12 @@ const LabDetail = () => {
                 </div>
               </div>
               {lab.completed ? (
-                <Badge className="bg-success">
+                <Badge className="bg-success shadow-lg shadow-success/50">
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Solved
                 </Badge>
               ) : (
-                <Badge variant="destructive">
+                <Badge variant="destructive" className="shadow-lg shadow-destructive/50">
                   <XCircle className="h-4 w-4 mr-1" />
                   Not Solved
                 </Badge>

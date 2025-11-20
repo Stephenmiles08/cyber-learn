@@ -50,8 +50,8 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e] p-4">
+      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/30 shadow-2xl rounded-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />

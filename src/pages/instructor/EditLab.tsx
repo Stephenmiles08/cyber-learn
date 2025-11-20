@@ -17,6 +17,7 @@ const EditLab = () => {
   const [flag, setFlag] = useState("");
   const [score, setScore] = useState("");
   const [difficulty, setDifficulty] = useState("Medium");
+  const [type, setType] = useState("exercise");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const EditLab = () => {
       setFlag(data.flag);
       setScore(data.score.toString());
       setDifficulty(data.difficulty || "Medium");
+      setType(data.type || "exercise");
     } catch (error) {
       toast({
         title: "Error",
@@ -56,6 +58,7 @@ const EditLab = () => {
         flag,
         score: parseInt(score),
         difficulty,
+        type,
       } as any);
 
       toast({
@@ -76,7 +79,7 @@ const EditLab = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
         <Navbar role="instructor" />
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground">Loading lab...</p>
@@ -86,10 +89,10 @@ const EditLab = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="instructor" />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Card>
+        <Card className="backdrop-blur-sm bg-card/80 border-border/30 shadow-2xl rounded-2xl">
           <CardHeader>
             <CardTitle className="text-2xl">Edit Lab</CardTitle>
             <CardDescription>
@@ -132,6 +135,19 @@ const EditLab = () => {
                     <SelectItem value="Easy">Easy</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="Hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type">Lab Type</Label>
+                <Select value={type} onValueChange={setType}>
+                  <SelectTrigger className="bg-card/50 border-border/50 focus:border-primary">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    <SelectItem value="exercise">Exercise</SelectItem>
+                    <SelectItem value="competition">Competition</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
