@@ -17,7 +17,8 @@ interface Lab {
   title: string;
   description: string;
   score: number;
-  submissionsCount?: number;
+  lab_type: "exercise" | "competition";
+ submissionsCount?: number;
 }
 
 interface Student {
@@ -54,7 +55,7 @@ const InstructorDashboard = () => {
 
         // Then fetch all other data
         const [labsData, studentsData, instructorsData] = await Promise.all([
-          api.getLabs(),
+          api.instructorLabs(),
           api.getStudents(),
           api.getInstructors(),
         ]);
@@ -92,7 +93,7 @@ const InstructorDashboard = () => {
       setDashboardMode(newMode);
       
       // Re-fetch labs to reflect the mode change immediately
-      const labsData = await api.getLabs();
+      const labsData = await api.instructorLabs();
       setLabs(labsData.labs || []);
       
       toast({
@@ -118,7 +119,7 @@ const InstructorDashboard = () => {
       });
       
       // Re-fetch data after deletion
-      const labsData = await api.getLabs();
+      const labsData = await api.instructorLabs();
       setLabs(labsData.labs || []);
     } catch (error) {
       toast({
@@ -137,9 +138,8 @@ const InstructorDashboard = () => {
         description: "All data has been cleared",
       });
       
-      // Re-fetch all data after reset
       const [labsData, studentsData, instructorsData] = await Promise.all([
-        api.getLabs(),
+        api.instructorLabs(),
         api.getStudents(),
         api.getInstructors(),
       ]);
@@ -163,7 +163,6 @@ const InstructorDashboard = () => {
         description: "All student scores have been reset to 0",
       });
       
-      // Re-fetch students data after reset
       const studentsData = await api.getStudents();
       setStudents(studentsData.students || []);
     } catch (error) {
@@ -183,8 +182,7 @@ const InstructorDashboard = () => {
         description: "All labs have been reinitialized",
       });
       
-      // Re-fetch labs after reset
-      const labsData = await api.getLabs();
+      const labsData = await api.instructorLabs();
       setLabs(labsData.labs || []);
     } catch (error) {
       toast({
@@ -231,271 +229,283 @@ const InstructorDashboard = () => {
             </div>
           </div>
 
-          {labs.length === 0 ? (
-            <Card className="bg-card/50 backdrop-blur-sm border-border shadow-xl">
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">No labs created yet</p>
-                <Link to="/instructor/labs/create">
-                  <Button className="shadow-lg hover:shadow-primary/30">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Lab
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {/* Dashboard Mode Toggle */}
-              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <span className="text-2xl">{dashboardMode === 'exercise' ? '📚' : '🏆'}</span>
-                    Dashboard Mode
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Control which lab type students can see on their dashboard
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl border border-primary/20 hover:border-primary/40 transition-all">
-                    <div className="space-y-1">
-                      <Label htmlFor="mode-toggle" className="text-xl font-bold text-foreground cursor-pointer">
-                        {dashboardMode === 'exercise' ? 'Exercise Mode' : 'Competition Mode'}
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        {dashboardMode === 'exercise' 
-                          ? 'Students see training exercises and practice challenges' 
-                          : 'Students see competition challenges and timed contests'}
-                      </p>
-                    </div>
-                    <Switch
-                      id="mode-toggle"
-                      checked={dashboardMode === 'competition'}
-                      onCheckedChange={handleModeToggle}
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-primary scale-125"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Instructors Section */}
-              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <UserPlus className="h-5 w-5 text-primary" />
-                    All Instructors
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    List of all instructor accounts with access to the platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {instructors.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">No instructors found</p>
-                  ) : (
-                    <ScrollArea className="h-[300px] pr-4">
-                      <div className="space-y-3">
-                        {instructors.map((instructor) => (
-                          <div
-                            key={instructor.id}
-                            className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary/10 border border-primary/20 hover:border-primary/40 group"
-                          >
-                            <p className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                              {instructor.username}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Student List Section */}
-              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <Users className="h-5 w-5 text-accent" />
-                    Students Overview
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Track student progress and scores across all labs
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {students.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">No students registered yet</p>
-                  ) : (
-                    <div className="rounded-lg border border-border/50 overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/50 hover:bg-muted/70">
-                            <TableHead className="font-bold">Username</TableHead>
-                            <TableHead className="font-bold">Total Score</TableHead>
-                            <TableHead className="font-bold">Labs Solved</TableHead>
-                            <TableHead className="font-bold">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {students.map((student, index) => (
-                            <TableRow 
-                              key={student.id}
-                              className={`hover:bg-primary/5 transition-colors ${index % 2 === 0 ? 'bg-card/30' : 'bg-card/10'}`}
-                            >
-                              <TableCell className="font-medium">{student.username}</TableCell>
-                              <TableCell className="text-success font-semibold">{student.total_score} points</TableCell>
-                              <TableCell className="text-accent font-semibold">{student.labs_solved} labs</TableCell>
-                              <TableCell>
-                                <Link to={`/instructor/student/${student.id}`}>
-                                  <Button variant="outline" size="sm" className="hover:bg-primary/10 hover:border-primary/50">
-                                    <Users className="h-4 w-4 mr-2" />
-                                    View Profile
-                                  </Button>
-                                </Link>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Labs Section */}
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  All Labs
-                </h2>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {labs.map((lab) => (
-                    <Card 
-                      key={lab.id} 
-                      className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl hover:shadow-primary/10 transition-all hover:scale-105 group"
-                    >
-                      <CardHeader>
-                        <CardTitle className="group-hover:text-primary transition-colors">{lab.title}</CardTitle>
-                        <CardDescription className="line-clamp-2">{lab.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between mb-4 p-3 bg-muted/30 rounded-lg">
-                          <span className="text-sm font-semibold text-success">Points: {lab.score}</span>
-                          <span className="text-sm font-semibold text-accent">
-                            {lab.submissionsCount || 0} submissions
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Link to={`/instructor/labs/${lab.id}/edit`} className="flex-1">
-                            <Button variant="outline" className="w-full hover:bg-primary/10 hover:border-primary/50">
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </Button>
-                          </Link>
-                          <Link to={`/instructor/labs/${lab.id}/submissions`} className="flex-1">
-                            <Button variant="outline" className="w-full hover:bg-accent/10 hover:border-accent/50">
-                              <Users className="h-4 w-4 mr-2" />
-                              View
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => handleDelete(lab.id)}
-                            className="hover:scale-110 transition-transform"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+          {/* Dashboard Mode Toggle - ALWAYS VISIBLE */}
+          <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <span className="text-2xl">{dashboardMode === 'exercise' ? 'Exercise' : 'Competition'}</span>
+                Dashboard Mode
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Control which lab type students can see on their dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl border border-primary/20 hover:border-primary/40 transition-all">
+                <div className="space-y-1">
+                  <Label htmlFor="mode-toggle" className="text-xl font-bold text-foreground cursor-pointer">
+                    {dashboardMode === 'exercise' ? 'Exercise Mode' : 'Competition Mode'}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {dashboardMode === 'exercise' 
+                      ? 'Students see training exercises and practice challenges' 
+                      : 'Students see competition challenges and timed contests'}
+                  </p>
                 </div>
+                <Switch
+                  id="mode-toggle"
+                  checked={dashboardMode === 'competition'}
+                  onCheckedChange={handleModeToggle}
+                  className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-primary scale-125"
+                />
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Admin Reset Section */}
-              <Card className="border-destructive/50 bg-destructive/5 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:shadow-destructive/10 transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="h-6 w-6 animate-pulse" />
-                    Admin Controls
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Dangerous operations - use with extreme caution. These actions cannot be undone.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-4">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
-                        <RotateCcw className="h-4 w-4 mr-2" />
-                        Reset Database
-                      </Button>
-                    </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Reset Entire Database?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete all data including students, labs, submissions, and scores. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleResetDatabase} className="bg-destructive hover:bg-destructive/90">
-                        Reset Database
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+          {/* Instructors Section - ALWAYS VISIBLE */}
+          <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                All Instructors
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                List of all instructor accounts with access to the platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {instructors.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No instructors found</p>
+              ) : (
+                <ScrollArea className="h-[300px] pr-4">
+                  <div className="space-y-3">
+                    {instructors.map((instructor) => (
+                      <div
+                        key={instructor.id}
+                        className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary/10 border border-primary/20 hover:border-primary/40 group"
+                      >
+                        <p className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                          {instructor.username}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
 
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
-                        <RotateCcw className="h-4 w-4 mr-2" />
-                        Reset Scores
-                      </Button>
-                    </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Reset All Student Scores?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will reset all student scores to 0. Submission history will be preserved. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleResetScores} className="bg-destructive hover:bg-destructive/90">
-                        Reset Scores
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+          {/* Student List Section - ALWAYS VISIBLE */}
+          <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Users className="h-5 w-5 text-accent" />
+                Students Overview
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Track student progress and scores across all labs
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {students.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">No students registered yet</p>
+              ) : (
+                <div className="rounded-lg border border-border/50 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50 hover:bg-muted/70">
+                        <TableHead className="font-bold">Username</TableHead>
+                        <TableHead className="font-bold">Total Score</TableHead>
+                        <TableHead className="font-bold">Labs Solved</TableHead>
+                        <TableHead className="font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {students.map((student, index) => (
+                        <TableRow 
+                          key={student.id}
+                          className={`hover:bg-primary/5 transition-colors ${index % 2 === 0 ? 'bg-card/30' : 'bg-card/10'}`}
+                        >
+                          <TableCell className="font-medium">{student.username}</TableCell>
+                          <TableCell className="text-success font-semibold">{student.total_score} points</TableCell>
+                          <TableCell className="text-accent font-semibold">{student.labs_solved} labs</TableCell>
+                          <TableCell>
+                            <Link to={`/instructor/student/${student.id}`}>
+                              <Button variant="outline" size="sm" className="hover:bg-primary/10 hover:border-primary/50">
+                                <Users className="h-4 w-4 mr-2" />
+                                View Profile
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
-                        <RotateCcw className="h-4 w-4 mr-2" />
-                        Reset Labs
-                      </Button>
-                    </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Reinitialize All Labs?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will delete all labs and create a fresh set of default labs. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleResetLabs} className="bg-destructive hover:bg-destructive/90">
-                        Reset Labs
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                  </AlertDialog>
+          {/* Labs Section - Only this part shows "no labs" message */}
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              All Labs
+            </h2>
+
+            {labs.length === 0 ? (
+              <Card className="bg-card/50 backdrop-blur-sm border-border shadow-xl">
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground mb-4">
+                  No labs created yet
+                  </p>
+                  <Link to="/instructor/labs/create">
+                    <Button className="shadow-lg hover:shadow-primary/30">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Lab
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
-            </>
-          )}
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {labs.map((lab) => (
+                  <Card 
+                    key={lab.id} 
+                    className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl hover:shadow-primary/10 transition-all hover:scale-105 group"
+                  >
+                    <CardHeader>
+                    <div className="flex justify-between items-center">
+  <CardTitle className="group-hover:text-primary transition-colors">{lab.title}</CardTitle>
+
+  <span className={
+    lab.lab_type === 'competition'
+      ? 'px-2 py-1 text-xs rounded bg-red-500/20 text-red-400 font-semibold'
+      : 'px-2 py-1 text-xs rounded bg-green-500/20 text-green-400 font-semibold'
+  }>
+    {lab.lab_type}
+  </span>
+</div>
+                      <CardTitle className="group-hover:text-primary transition-colors">{lab.title}</CardTitle>
+                      <CardDescription className="line-clamp-2">{lab.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between mb-4 p-3 bg-muted/30 rounded-lg">
+                        <span className="text-sm font-semibold text-success">Points: {lab.score}</span>
+                        <span className="text-sm font-semibold text-accent">
+                          {lab.submissionsCount || 0} submissions
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Link to={`/instructor/labs/${lab.id}/edit`} className="flex-1">
+                          <Button variant="outline" className="w-full hover:bg-primary/10 hover:border-primary/50">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                        </Link>
+                        <Link to={`/instructor/labs/${lab.id}/submissions`} className="flex-1">
+                          <Button variant="outline" className="w-full hover:bg-accent/10 hover:border-accent/50">
+                            <Users className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(lab.id)}
+                          className="hover:scale-110 transition-transform"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Admin Reset Section - ALWAYS VISIBLE */}
+          <Card className="border-destructive/50 bg-destructive/5 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:shadow-destructive/10 transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-6 w-6 animate-pulse" />
+                Admin Controls
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Dangerous operations - use with extreme caution. These actions cannot be undone.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-4">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset Database
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset Entire Database?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all data including students, labs, submissions, and scores. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetDatabase} className="bg-destructive hover:bg-destructive/90">
+                      Reset Database
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset Scores
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset All Student Scores?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will reset all student scores to 0. Submission history will be preserved. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetScores} className="bg-destructive hover:bg-destructive/90">
+                      Reset Scores
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset Labs
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reinitialize All Labs?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will delete all labs and create a fresh set of default labs. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetLabs} className="bg-destructive hover:bg-destructive/90">
+                      Reset Labs
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

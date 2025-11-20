@@ -17,7 +17,7 @@ const EditLab = () => {
   const [flag, setFlag] = useState("");
   const [score, setScore] = useState("");
   const [difficulty, setDifficulty] = useState("Medium");
-  const [type, setType] = useState("exercise");
+  const [lab_type, setType] = useState("exercise");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ const EditLab = () => {
         flag,
         score: parseInt(score),
         difficulty,
-        type,
+        lab_type,
       } as any);
 
       toast({
@@ -141,7 +141,7 @@ const EditLab = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="type">Lab Type</Label>
-                <Select value={type} onValueChange={setType}>
+                <Select value={lab_type} onValueChange={setType}>
                   <SelectTrigger className="bg-card/50 border-border/50 focus:border-primary">
                     <SelectValue />
                   </SelectTrigger>

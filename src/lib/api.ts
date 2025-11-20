@@ -28,6 +28,13 @@ export const api = {
     return response.json();
   },
 
+  instructorLabs: async ()=>{
+    const response = await fetch(`${API_URL}/labs/all`,{
+      headers: getAuthHeaders(),
+    });
+
+    return response.json();
+  },
   // Labs
   getLabs: async () => {
     const response = await fetch(`${API_URL}/labs`, {
@@ -52,7 +59,7 @@ export const api = {
     return response.json();
   },
 
-  updateLab: async (id: string, lab: { title: string; description: string; flag: string; score: number }) => {
+  updateLab: async (id: string, lab: { title: string; description: string; flag: string; score: number, lab_type: string }) => {
     const response = await fetch(`${API_URL}/labs/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
