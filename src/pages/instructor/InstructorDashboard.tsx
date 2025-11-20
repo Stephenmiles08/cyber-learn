@@ -36,50 +36,65 @@ const InstructorDashboard = () => {
   const [labs, setLabs] = useState<Lab[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
-  const [dashboardMode, setDashboardMode] = useState<'exercise' | 'competition'>('exercise');
+  const [dashboardMode, setDashboardMode] = useState<'exercise' | 'competition' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchData();
-    fetchDashboardMode();
-  }, []);
+    let isMounted = true;
+    
+    const initializeDashboard = async () => {
+      try {
+        // First, fetch the dashboard mode
+        const modeData = await api.getDashboardMode();
+        if (!isMounted) return;
+        
+        const mode = modeData.mode || 'exercise';
+        setDashboardMode(mode);
 
-  const fetchData = async () => {
-    try {
-      const [labsData, studentsData, instructorsData] = await Promise.all([
-        api.getLabs(),
-        api.getStudents(),
-        api.getInstructors(),
-      ]);
-      setLabs(labsData.labs || []);
-      setStudents(studentsData.students || []);
-      setInstructors(instructorsData.instructors || []);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load data",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        // Then fetch all other data
+        const [labsData, studentsData, instructorsData] = await Promise.all([
+          api.getLabs(),
+          api.getStudents(),
+          api.getInstructors(),
+        ]);
+        
+        if (!isMounted) return;
+        
+        setLabs(labsData.labs || []);
+        setStudents(studentsData.students || []);
+        setInstructors(instructorsData.instructors || []);
+      } catch (error) {
+        if (!isMounted) return;
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data",
+          variant: "destructive",
+        });
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  const fetchDashboardMode = async () => {
-    try {
-      const data = await api.getDashboardMode();
-      setDashboardMode(data.mode || 'exercise');
-    } catch (error) {
-      console.error('Failed to fetch dashboard mode:', error);
-    }
-  };
+    initializeDashboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [toast]);
 
   const handleModeToggle = async (checked: boolean) => {
     const newMode = checked ? 'competition' : 'exercise';
     try {
       await api.setDashboardMode(newMode);
       setDashboardMode(newMode);
+      
+      // Re-fetch labs to reflect the mode change immediately
+      const labsData = await api.getLabs();
+      setLabs(labsData.labs || []);
+      
       toast({
         title: "Mode Changed",
         description: `Students will now see ${newMode} labs`,
@@ -101,7 +116,10 @@ const InstructorDashboard = () => {
       toast({
         title: "Lab deleted",
       });
-      fetchData();
+      
+      // Re-fetch data after deletion
+      const labsData = await api.getLabs();
+      setLabs(labsData.labs || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -118,7 +136,16 @@ const InstructorDashboard = () => {
         title: "Database reset",
         description: "All data has been cleared",
       });
-      fetchData();
+      
+      // Re-fetch all data after reset
+      const [labsData, studentsData, instructorsData] = await Promise.all([
+        api.getLabs(),
+        api.getStudents(),
+        api.getInstructors(),
+      ]);
+      setLabs(labsData.labs || []);
+      setStudents(studentsData.students || []);
+      setInstructors(instructorsData.instructors || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -135,7 +162,10 @@ const InstructorDashboard = () => {
         title: "Scores reset",
         description: "All student scores have been reset to 0",
       });
-      fetchData();
+      
+      // Re-fetch students data after reset
+      const studentsData = await api.getStudents();
+      setStudents(studentsData.students || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -152,7 +182,10 @@ const InstructorDashboard = () => {
         title: "Labs reset",
         description: "All labs have been reinitialized",
       });
-      fetchData();
+      
+      // Re-fetch labs after reset
+      const labsData = await api.getLabs();
+      setLabs(labsData.labs || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -163,210 +196,241 @@ const InstructorDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a15] via-[#1a1a2e] to-[#0f0a2e]">
       <Navbar role="instructor" />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Instructor Dashboard</h1>
-            <p className="text-muted-foreground">Manage labs, students, and platform settings</p>
-          </div>
-          <div className="flex gap-2">
-            <Link to="/instructor/create">
-              <Button variant="outline">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Create Instructor
-              </Button>
-            </Link>
-            <Link to="/instructor/labs/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Lab
-              </Button>
-            </Link>
+      
+      {isLoading || dashboardMode === null ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+            <p className="text-muted-foreground text-lg">Loading dashboard...</p>
           </div>
         </div>
-
-        {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading labs...</p>
-          </div>
-        ) : labs.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground mb-4">No labs created yet</p>
-              <Link to="/instructor/labs/create">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Lab
+      ) : (
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Instructor Dashboard
+              </h1>
+              <p className="text-muted-foreground">Manage labs, students, and platform settings</p>
+            </div>
+            <div className="flex gap-2">
+              <Link to="/instructor/create">
+                <Button variant="outline" className="shadow-lg hover:shadow-primary/20 transition-all">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Create Instructor
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            {/* Dashboard Mode Toggle */}
-            <Card className="mb-6 bg-gradient-dark border-border/50 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-foreground">Dashboard Mode</CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Control which lab type students can see
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between p-4 bg-card/30 rounded-lg border border-border/30">
-                  <div className="space-y-1">
-                    <Label htmlFor="mode-toggle" className="text-lg font-semibold text-foreground">
-                      {dashboardMode === 'exercise' ? '📚 Exercise Mode' : '🏆 Competition Mode'}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      {dashboardMode === 'exercise' 
-                        ? 'Students see training exercises' 
-                        : 'Students see competition challenges'}
-                    </p>
-                  </div>
-                  <Switch
-                    id="mode-toggle"
-                    checked={dashboardMode === 'competition'}
-                    onCheckedChange={handleModeToggle}
-                    className="data-[state=checked]:bg-accent"
-                  />
-                </div>
+              <Link to="/instructor/labs/create">
+                <Button className="shadow-lg hover:shadow-primary/30 transition-all">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Lab
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {labs.length === 0 ? (
+            <Card className="bg-card/50 backdrop-blur-sm border-border shadow-xl">
+              <CardContent className="py-12 text-center">
+                <p className="text-muted-foreground mb-4">No labs created yet</p>
+                <Link to="/instructor/labs/create">
+                  <Button className="shadow-lg hover:shadow-primary/30">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Lab
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
-
-            {/* Instructors Section */}
-            <Card className="mb-6 bg-gradient-dark border-border/50 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-foreground">All Instructors</CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  List of all instructor accounts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {instructors.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No instructors found</p>
-                ) : (
-                  <ScrollArea className="h-[300px] pr-4">
-                    <div className="space-y-3">
-                      {instructors.map((instructor) => (
-                        <div
-                          key={instructor.id}
-                          className="p-4 rounded-lg bg-card/50 hover:bg-card/70 transition-all duration-300 shadow-md hover:shadow-lg border border-border/30"
-                        >
-                          <p className="font-bold text-lg text-foreground">{instructor.username}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Student List Section */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Students Overview</CardTitle>
-                <CardDescription>Track student progress and scores</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {students.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">No students registered yet</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Total Score</TableHead>
-                        <TableHead>Labs Solved</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {students.map((student) => (
-                        <TableRow key={student.id}>
-                          <TableCell className="font-medium">{student.username}</TableCell>
-                          <TableCell>{student.total_score} points</TableCell>
-                          <TableCell>{student.labs_solved} labs</TableCell>
-                          <TableCell>
-                            <Link to={`/instructor/student/${student.id}`}>
-                              <Button variant="outline" size="sm">
-                                <Users className="h-4 w-4 mr-2" />
-                                View Profile
-                              </Button>
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Labs Section */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">Labs</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {labs.map((lab) => (
-              <Card key={lab.id} className="hover:shadow-lg transition-shadow">
+          ) : (
+            <>
+              {/* Dashboard Mode Toggle */}
+              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
                 <CardHeader>
-                  <CardTitle>{lab.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{lab.description}</CardDescription>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <span className="text-2xl">{dashboardMode === 'exercise' ? '📚' : '🏆'}</span>
+                    Dashboard Mode
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Control which lab type students can see on their dashboard
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-muted-foreground">Points: {lab.score}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {lab.submissionsCount || 0} submissions
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link to={`/instructor/labs/${lab.id}/edit`} className="flex-1">
-                      <Button variant="outline" className="w-full">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </Link>
-                    <Link to={`/instructor/labs/${lab.id}/submissions`} className="flex-1">
-                      <Button variant="outline" className="w-full">
-                        <Users className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => handleDelete(lab.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl border border-primary/20 hover:border-primary/40 transition-all">
+                    <div className="space-y-1">
+                      <Label htmlFor="mode-toggle" className="text-xl font-bold text-foreground cursor-pointer">
+                        {dashboardMode === 'exercise' ? 'Exercise Mode' : 'Competition Mode'}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {dashboardMode === 'exercise' 
+                          ? 'Students see training exercises and practice challenges' 
+                          : 'Students see competition challenges and timed contests'}
+                      </p>
+                    </div>
+                    <Switch
+                      id="mode-toggle"
+                      checked={dashboardMode === 'competition'}
+                      onCheckedChange={handleModeToggle}
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-primary scale-125"
+                    />
                   </div>
                 </CardContent>
               </Card>
-                ))}
-              </div>
-            </div>
 
-            {/* Admin Reset Section */}
-            <Card className="border-destructive/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-5 w-5" />
-                  Admin Controls
-                </CardTitle>
-                <CardDescription>
-                  Dangerous operations - use with caution
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-4">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset Database
-                    </Button>
-                  </AlertDialogTrigger>
+              {/* Instructors Section */}
+              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <UserPlus className="h-5 w-5 text-primary" />
+                    All Instructors
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    List of all instructor accounts with access to the platform
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {instructors.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No instructors found</p>
+                  ) : (
+                    <ScrollArea className="h-[300px] pr-4">
+                      <div className="space-y-3">
+                        {instructors.map((instructor) => (
+                          <div
+                            key={instructor.id}
+                            className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary/10 border border-primary/20 hover:border-primary/40 group"
+                          >
+                            <p className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                              {instructor.username}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Student List Section */}
+              <Card className="mb-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Users className="h-5 w-5 text-accent" />
+                    Students Overview
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Track student progress and scores across all labs
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {students.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-4">No students registered yet</p>
+                  ) : (
+                    <div className="rounded-lg border border-border/50 overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-muted/50 hover:bg-muted/70">
+                            <TableHead className="font-bold">Username</TableHead>
+                            <TableHead className="font-bold">Total Score</TableHead>
+                            <TableHead className="font-bold">Labs Solved</TableHead>
+                            <TableHead className="font-bold">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {students.map((student, index) => (
+                            <TableRow 
+                              key={student.id}
+                              className={`hover:bg-primary/5 transition-colors ${index % 2 === 0 ? 'bg-card/30' : 'bg-card/10'}`}
+                            >
+                              <TableCell className="font-medium">{student.username}</TableCell>
+                              <TableCell className="text-success font-semibold">{student.total_score} points</TableCell>
+                              <TableCell className="text-accent font-semibold">{student.labs_solved} labs</TableCell>
+                              <TableCell>
+                                <Link to={`/instructor/student/${student.id}`}>
+                                  <Button variant="outline" size="sm" className="hover:bg-primary/10 hover:border-primary/50">
+                                    <Users className="h-4 w-4 mr-2" />
+                                    View Profile
+                                  </Button>
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Labs Section */}
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  All Labs
+                </h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {labs.map((lab) => (
+                    <Card 
+                      key={lab.id} 
+                      className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl hover:shadow-2xl hover:shadow-primary/10 transition-all hover:scale-105 group"
+                    >
+                      <CardHeader>
+                        <CardTitle className="group-hover:text-primary transition-colors">{lab.title}</CardTitle>
+                        <CardDescription className="line-clamp-2">{lab.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between mb-4 p-3 bg-muted/30 rounded-lg">
+                          <span className="text-sm font-semibold text-success">Points: {lab.score}</span>
+                          <span className="text-sm font-semibold text-accent">
+                            {lab.submissionsCount || 0} submissions
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Link to={`/instructor/labs/${lab.id}/edit`} className="flex-1">
+                            <Button variant="outline" className="w-full hover:bg-primary/10 hover:border-primary/50">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </Button>
+                          </Link>
+                          <Link to={`/instructor/labs/${lab.id}/submissions`} className="flex-1">
+                            <Button variant="outline" className="w-full hover:bg-accent/10 hover:border-accent/50">
+                              <Users className="h-4 w-4 mr-2" />
+                              View
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleDelete(lab.id)}
+                            className="hover:scale-110 transition-transform"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Admin Reset Section */}
+              <Card className="border-destructive/50 bg-destructive/5 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:shadow-destructive/10 transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-6 w-6 animate-pulse" />
+                    Admin Controls
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Dangerous operations - use with extreme caution. These actions cannot be undone.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-4">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset Database
+                      </Button>
+                    </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Reset Entire Database?</AlertDialogTitle>
@@ -383,13 +447,13 @@ const InstructorDashboard = () => {
                   </AlertDialogContent>
                 </AlertDialog>
 
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset Scores
-                    </Button>
-                  </AlertDialogTrigger>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset Scores
+                      </Button>
+                    </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Reset All Student Scores?</AlertDialogTitle>
@@ -406,13 +470,13 @@ const InstructorDashboard = () => {
                   </AlertDialogContent>
                 </AlertDialog>
 
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset Labs
-                    </Button>
-                  </AlertDialogTrigger>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-lg hover:shadow-destructive/30 transition-all">
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset Labs
+                      </Button>
+                    </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Reinitialize All Labs?</AlertDialogTitle>
@@ -427,12 +491,13 @@ const InstructorDashboard = () => {
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
-                </AlertDialog>
-              </CardContent>
-            </Card>
-          </>
-        )}
-      </div>
+                  </AlertDialog>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
