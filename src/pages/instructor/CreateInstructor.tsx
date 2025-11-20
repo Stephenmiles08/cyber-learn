@@ -38,10 +38,10 @@ const CreateInstructor = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="instructor" />
       <div className="container mx-auto px-4 py-8 max-w-md">
-        <Card>
+        <Card className="backdrop-blur-sm bg-card/80 border-border/30 shadow-2xl rounded-2xl">
           <CardHeader>
             <CardTitle>Create Instructor Account</CardTitle>
             <CardDescription>

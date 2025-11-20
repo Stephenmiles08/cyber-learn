@@ -61,7 +61,7 @@ const StudentProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
         <Navbar role="instructor" />
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground">Loading student profile...</p>
@@ -72,7 +72,7 @@ const StudentProfile = () => {
 
   if (!student) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
         <Navbar role="instructor" />
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground">Student not found</p>
@@ -82,7 +82,7 @@ const StudentProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a15] to-[#1a1a2e]">
       <Navbar role="instructor" />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Student Header */}
