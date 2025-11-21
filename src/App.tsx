@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import CreateInstructor from "./pages/instructor/CreateInstructor";
 import CreateLab from "./pages/instructor/CreateLab";
@@ -33,21 +34,31 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* Change Password - Accessible to both roles */}
+          {/* Change Password - Accessible to all authenticated users */}
           <Route
             path="/change-password"
             element={
-              <ProtectedRoute requiredRole={null}>
+              <ProtectedRoute>
                 <ChangePassword />
               </ProtectedRoute>
             }
           />
           
-          {/* Instructor Routes */}
+          {/* Super Admin Routes */}
+          <Route
+            path="/superadmin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['superadmin']}>
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Instructor Routes - Superadmin can also access */}
           <Route
             path="/instructor/dashboard"
             element={
-              <ProtectedRoute requiredRole="instructor">
+              <ProtectedRoute allowedRoles={['superadmin', 'instructor']}>
                 <InstructorDashboard />
               </ProtectedRoute>
             }
@@ -55,7 +66,7 @@ const App = () => (
           <Route
             path="/instructor/create"
             element={
-              <ProtectedRoute requiredRole="instructor">
+              <ProtectedRoute allowedRoles={['superadmin']}>
                 <CreateInstructor />
               </ProtectedRoute>
             }
@@ -63,7 +74,7 @@ const App = () => (
           <Route
             path="/instructor/student/:id"
             element={
-              <ProtectedRoute requiredRole="instructor">
+              <ProtectedRoute allowedRoles={['superadmin', 'instructor']}>
                 <StudentProfile />
               </ProtectedRoute>
             }
@@ -71,7 +82,7 @@ const App = () => (
           <Route
             path="/instructor/labs/create"
             element={
-              <ProtectedRoute requiredRole="instructor">
+              <ProtectedRoute allowedRoles={['superadmin', 'instructor']}>
                 <CreateLab />
               </ProtectedRoute>
             }
@@ -79,7 +90,7 @@ const App = () => (
           <Route
             path="/instructor/labs/:id/edit"
             element={
-              <ProtectedRoute requiredRole="instructor">
+              <ProtectedRoute allowedRoles={['superadmin', 'instructor']}>
                 <EditLab />
               </ProtectedRoute>
             }
@@ -87,7 +98,7 @@ const App = () => (
           <Route
             path="/instructor/labs/:id/submissions"
             element={
-              <ProtectedRoute requiredRole="instructor">
+              <ProtectedRoute allowedRoles={['superadmin', 'instructor']}>
                 <LabSubmissions />
               </ProtectedRoute>
             }
@@ -97,7 +108,7 @@ const App = () => (
           <Route
             path="/student/dashboard"
             element={
-              <ProtectedRoute requiredRole="student">
+              <ProtectedRoute allowedRoles={['student']}>
                 <StudentDashboard />
               </ProtectedRoute>
             }
@@ -105,7 +116,7 @@ const App = () => (
           <Route
             path="/student/labs/:id"
             element={
-              <ProtectedRoute requiredRole="student">
+              <ProtectedRoute allowedRoles={['student']}>
                 <LabDetail />
               </ProtectedRoute>
             }
@@ -113,7 +124,7 @@ const App = () => (
           <Route
             path="/student/leaderboard"
             element={
-              <ProtectedRoute requiredRole="student">
+              <ProtectedRoute allowedRoles={['superadmin', 'instructor', 'student']}>
                 <Leaderboard />
               </ProtectedRoute>
             }
@@ -121,7 +132,7 @@ const App = () => (
           <Route
             path="/student/profile"
             element={
-              <ProtectedRoute requiredRole="student">
+              <ProtectedRoute allowedRoles={['student']}>
                 <Profile />
               </ProtectedRoute>
             }

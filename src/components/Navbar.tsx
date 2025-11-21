@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, LogOut, KeyRound } from "lucide-react";
+import { NavLink } from "@/components/NavLink";
+import { Shield, BookOpen, Users, Settings, Trophy, User, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+type Role = 'superadmin' | 'instructor' | 'student' | null;
+
 interface NavbarProps {
-  role?: 'student' | 'instructor' | null;
+  role?: Role;
 }
 
 export const Navbar = ({ role }: NavbarProps) => {
@@ -14,6 +17,7 @@ export const Navbar = ({ role }: NavbarProps) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('username');
     toast({
       title: "Logged out successfully",
     });
@@ -21,50 +25,75 @@ export const Navbar = ({ role }: NavbarProps) => {
   };
 
   return (
-    <nav className="border-b bg-card">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to={role === 'instructor' ? '/instructor/dashboard' : '/student/dashboard'} className="flex items-center gap-2">
-          <Shield className="h-6 w-6 text-primary" />
-          <span className="text-xl font-semibold">SQI Cyber BootCamp</span>
-        </Link>
-
-        <div className="flex items-center gap-4">
-          {role === 'student' && (
-            <>
-              <Link to="/student/dashboard">
-                <Button variant="ghost">Labs</Button>
-              </Link>
-              <Link to="/student/leaderboard">
-                <Button variant="ghost">Leaderboard</Button>
-              </Link>
-              <Link to="/student/profile">
-                <Button variant="ghost">Profile</Button>
-              </Link>
-            </>
-          )}
-
-          {role === 'instructor' && (
-            <>
-              <Link to="/instructor/dashboard">
-                <Button variant="ghost">Labs</Button>
-              </Link>
-              <Link to="/instructor/labs/create">
-                <Button variant="ghost">Create Lab</Button>
-              </Link>
-            </>
-          )}
-
+    <nav className="border-b bg-card/30 backdrop-blur-lg border-border/50 shadow-lg">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold glow-text">SQI Cyber BootCamp</span>
+          </div>
+          
           {role && (
-            <>
-              <Link to="/change-password">
-                <Button variant="ghost" size="icon">
-                  <KeyRound className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-5 w-5" />
+            <div className="flex items-center space-x-6">
+              {role === 'superadmin' && (
+                <>
+                  <NavLink to="/superadmin/dashboard">
+                    <Settings className="h-4 w-4 inline mr-1" />
+                    Dashboard
+                  </NavLink>
+                  <NavLink to="/instructor/labs/create">
+                    <BookOpen className="h-4 w-4 inline mr-1" />
+                    Create Lab
+                  </NavLink>
+                  <NavLink to="/student/leaderboard">
+                    <Trophy className="h-4 w-4 inline mr-1" />
+                    Leaderboard
+                  </NavLink>
+                </>
+              )}
+              {role === 'instructor' && (
+                <>
+                  <NavLink to="/instructor/dashboard">
+                    <BookOpen className="h-4 w-4 inline mr-1" />
+                    Labs
+                  </NavLink>
+                  <NavLink to="/instructor/labs/create">
+                    Create Lab
+                  </NavLink>
+                  <NavLink to="/student/leaderboard">
+                    <Trophy className="h-4 w-4 inline mr-1" />
+                    Leaderboard
+                  </NavLink>
+                </>
+              )}
+              {role === 'student' && (
+                <>
+                  <NavLink to="/student/dashboard">
+                    <BookOpen className="h-4 w-4 inline mr-1" />
+                    Labs
+                  </NavLink>
+                  <NavLink to="/student/leaderboard">
+                    <Trophy className="h-4 w-4 inline mr-1" />
+                    Leaderboard
+                  </NavLink>
+                  <NavLink to="/student/profile">
+                    <User className="h-4 w-4 inline mr-1" />
+                    Profile
+                  </NavLink>
+                </>
+              )}
+              <NavLink to="/change-password">
+                <Lock className="h-4 w-4 inline mr-1" />
+                Change Password
+              </NavLink>
+              <Button 
+                onClick={handleLogout}
+                variant="outline"
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
+              >
+                Logout
               </Button>
-            </>
+            </div>
           )}
         </div>
       </div>

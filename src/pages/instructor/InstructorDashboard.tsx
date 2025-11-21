@@ -40,6 +40,10 @@ const InstructorDashboard = () => {
   const [dashboardMode, setDashboardMode] = useState<'exercise' | 'competition' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  
+  // Check if user is superadmin
+  const role = localStorage.getItem('role');
+  const isSuperAdmin = role === 'superadmin';
 
   useEffect(() => {
     let isMounted = true;

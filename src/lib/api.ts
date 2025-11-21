@@ -1,5 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
+export type DashboardMode = 'exercise' | 'competition';
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
   return {
@@ -10,7 +12,7 @@ const getAuthHeaders = () => {
 
 export const api = {
   // Auth
-  login: async (username: string, password: string, role: 'student' | 'instructor') => {
+  login: async (username: string, password: string, role: 'student' | 'instructor' | 'superadmin') => {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
