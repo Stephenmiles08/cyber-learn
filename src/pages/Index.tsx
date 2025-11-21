@@ -9,7 +9,9 @@ const Index = () => {
     const role = localStorage.getItem('role');
 
     if (token && role) {
-      if (role === 'instructor') {
+      if (role === 'superadmin') {
+        navigate('/superadmin/dashboard');
+      } else if (role === 'instructor') {
         navigate('/instructor/dashboard');
       } else {
         navigate('/student/dashboard');

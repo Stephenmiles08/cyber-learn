@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<'student' | 'instructor'>('student');
+  const [role, setRole] = useState<'student' | 'instructor' | 'superadmin'>('student');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,13 +27,17 @@ const Login = () => {
       if (response.token) {
         localStorage.setItem('token', response.token);
         localStorage.setItem('role', response.role);
+        localStorage.setItem('username', response.username || username);
         
         toast({
           title: "Login successful",
           description: `Welcome back!`,
         });
 
-        if (response.role === 'instructor') {
+        // Navigate based on actual role from backend
+        if (response.role === 'superadmin') {
+          navigate('/superadmin/dashboard');
+        } else if (response.role === 'instructor') {
           navigate('/instructor/dashboard');
         } else {
           navigate('/student/dashboard');
@@ -67,10 +71,11 @@ const Login = () => {
           <CardDescription>Sign in to continue your training</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={role} onValueChange={(v) => setRole(v as 'student' | 'instructor')}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+          <Tabs value={role} onValueChange={(v) => setRole(v as 'student' | 'instructor' | 'superadmin')}>
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="student">Student</TabsTrigger>
               <TabsTrigger value="instructor">Instructor</TabsTrigger>
+              <TabsTrigger value="superadmin">Admin</TabsTrigger>
             </TabsList>
 
             <TabsContent value="student">
@@ -133,6 +138,35 @@ const Login = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Sign in as Instructor"}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="superadmin">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="admin-username">Admin Username</Label>
+                  <Input
+                    id="admin-username"
+                    type="text"
+                    placeholder="Type..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-password">Password</Label>
+                  <Input
+                    id="admin-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Signing in..." : "Sign in as Admin"}
                 </Button>
               </form>
             </TabsContent>
